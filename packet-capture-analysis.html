@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>抓包分析实战：你的网络请求到底经历了什么审查？</title>
+  <style>
+    :root { --navy: #0A192F; --blue: #00E5FF; --orange: #FF5722; --white: #FFFFFF; --border: 4px solid var(--navy); }
+    * { box-sizing: border-box; }
+    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin: 0; padding: 0; background: var(--white); color: var(--navy); line-height: 1.8; overflow-x: hidden; }
+    h1, h2, h3, h4 { text-transform: uppercase; font-weight: 900; letter-spacing: 1px; margin-top: 0; }
+    p { font-size: 1.1rem; font-weight: 500; margin-bottom: 20px; }
+    a { color: #00E676; text-decoration: none; }
+    a:visited { color: #00E676; }
+    a:hover { color: #00E676; text-decoration: underline; }
+    .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 40px; border-bottom: var(--border); background: var(--white); position: sticky; top: 0; z-index: 9999; }
+    .logo { display: flex; align-items: center; font-size: 1.5rem; font-weight: 900; gap: 10px; color: var(--navy); text-decoration: none; }
+    .nav-links { display: flex; gap: 20px; }
+    .nav-links a.nav-link { color: var(--navy); font-weight: bold; font-size: 1.1rem; border-bottom: 2px solid transparent; transition: border-color 0.2s; }
+    .nav-links a.nav-link:hover { border-color: var(--blue); text-decoration: none; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+    .article-content { border: var(--border); background: var(--white); padding: 50px; box-shadow: 12px 12px 0 var(--navy); }
+    .article-content h1 { font-size: 2.5rem; margin-bottom: 30px; border-bottom: 4px solid var(--blue); padding-bottom: 20px; }
+    .article-content h2 { font-size: 1.8rem; margin-top: 40px; margin-bottom: 20px; color: var(--navy); border-left: 6px solid var(--orange); padding-left: 15px; }
+    .article-content h3 { font-size: 1.4rem; margin-top: 30px; margin-bottom: 15px; }
+    .article-content p { text-align: justify; }
+    .footer { background: var(--navy); color: var(--white); padding: 40px 20px; text-align: center; border-top: 8px solid var(--blue); }
+  
+    @media (max-width: 768px) {
+      .header { padding: 10px 15px !important; flex-wrap: wrap; justify-content: space-between !important; gap: 10px; }
+      .logo { font-size: 1.2rem !important; }
+      .nav-menu { display: contents; }
+      .nav-links { order: 3; width: 100%; overflow-x: auto; white-space: nowrap; padding-bottom: 5px; margin-top: 5px; -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 15px !important; display: flex !important; flex-direction: row !important; }
+      .nav-links::-webkit-scrollbar { display: none; }
+      .header .btn { order: 2; padding: 8px 15px !important; font-size: 0.9rem !important; margin: 0 !important; }
+    }
+</style>
+</head>
+<body>
+  <header class="header">
+    <a href="index.html" class="logo" style="color:var(--navy);">极速CLOUD</a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link" style="color:var(--navy);">返回首页</a>
+      <a href="news.html" class="nav-link" style="color:var(--navy);">极客基地</a>
+    </div>
+  </header>
+  <div class="container">
+    <article class="article-content">
+      <h1>抓包分析实战：你的网络请求到底经历了什么审查？</h1>
+      
+      <h2>一、看不见的“守门员”：网络审查概述</h2>
+      <p>当你轻敲键盘，按下回车键，访问一个网页时，看似简单的几秒钟内，底层数据包却经历了一场复杂而惊险的旅程。在这个旅程中，数据包不仅要跨越无数的路由器和海底光缆，还要接受各种安全设备的严密“盘查”。这些盘查机制，构成了我们常说的网络审查系统。为了真正理解这些机制，网络工程师们常常需要借助 <a href="https://tizilab.net/" target="_blank">深度网络协议解析工具</a> 进行抓包分析，让无形的审查变得可视化。</p>
+
+      <h2>二、常见审查手段与抓包特征</h2>
+      <h3>1. DNS污染与劫持</h3>
+      <p>这是最常见的第一道防线。当你在浏览器输入域名时，系统首先需要向DNS服务器查询对应的IP地址。审查系统通过监听UDP 53端口的流量，一旦发现对特定黑名单域名的查询，便会抢在真实的DNS响应到达之前，向你的计算机返回一个伪造的错误IP。在Wireshark等抓包工具中，这通常表现为针对同一DNS请求，连续收到多个响应包，且第一个到达的通常是被污染的虚假地址。</p>
+
+      <h3>2. TCP重置攻击（TCP RST）</h3>
+      <p>当你的计算机试图与某个被封锁的IP或含有敏感关键字的连接建立通信时，审查系统（如防火墙）并不会直接切断物理链路。相反，它会伪装成通信的另一方，向双方发送带有RST（Reset）标志位的TCP数据包，强行终止连接。在抓包分析时，你会看到正常的TCP三次握手刚刚完成或正在进行中，突然凭空出现一个带有RST标志的深红色数据包，导致连接瞬间被掐断。</p>
+
+      <h3>3. SNI（服务器名称指示）阻断</h3>
+      <p>随着HTTPS的普及，网络传输的内容已被加密，审查系统无法直接窥探数据。然而，在TLS握手阶段的ClientHello消息中，包含着一个明文的SNI字段，用于告诉服务器客户端想要访问的具体域名。审查系统正是通过精准匹配这一明文字段，来进行阻断。抓包时，你会清晰地看到TLS握手卡在ClientHello阶段，随后紧跟一个TCP RST包，宣告连接失败。</p>
+
+      <h2>三、深度包检测（DPI）技术的逻辑</h2>
+      <p>DPI（Deep Packet Inspection）是现代网络审查的核心技术。与早期的包过滤防火墙只检查IP地址和端口号不同，DPI技术深入探究数据包的应用层负载。它能够根据预设的签名特征库，识别出具体的应用程序或协议类型。例如，早期的某些加密代理协议由于握手过程存在固定的字节序列，DPI设备能够在毫秒级内将其识别并予以阻断。应对DPI，正是下一代加密协议和混淆技术重点突破的方向。</p>
+
+      <h2>四、实战演练：如何开展抓包分析？</h2>
+      <h3>1. 选择合适的抓包工具</h3>
+      <p>对于桌面端，Wireshark是毫无争议的行业标杆，功能强大且支持全协议解析。如果你需要分析移动设备或应用层（如HTTP/HTTPS）的数据，Fiddler或Charles则更为直观高效。在Linux服务器上，tcpdump则是最轻量、最强大的命令行抓包利器。</p>
+
+      <h3>2. 建立分析基线</h3>
+      <p>在开始分析异常之前，首先需要了解“正常”的状态是什么样的。通过抓取一次成功的、未受干扰的网络请求，仔细观察DNS查询的耗时、TCP三次握手的时序、TLS握手的交互过程，建立起对比基线。</p>
+
+      <h3>3. 提取关键异常特征</h3>
+      <p>当网络受阻时，启动抓包工具，复现问题。利用过滤器过滤掉无关流量（如后台心跳包）。重点关注异常断开的连接、突然出现的ICMP不可达消息、多余的RST包，或是异常延迟的数据段。将这些异常数据与基线进行对比，往往就能揭示出审查系统介入的具体环节和手段。</p>
+
+      <h2>五、结语：以技术对抗封锁</h2>
+      <p>网络抓包不仅是一项高级的调试技能，更是理解互联网底层运行规律的钥匙。通过对数据包的抽丝剥茧，我们能够清晰地看到审查机制的工作原理。正是基于这些深度的分析，极客和开发者们才能不断推陈出新，设计出更加隐蔽、更加强大的加密混淆协议，在道高一尺魔高一丈的技术博弈中，捍卫通信的自由与安全。</p>
+    </article>
+  </div>
+  <footer class="footer">
+    <p>&copy; 2026 极速Cloud. 保留所有权利。</p>
+  </footer>
+</body>
+</html>
