@@ -2,6 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://jisicloudyun.sbs/</loc>
+    <lastmod>2026-11-17</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
@@ -18,30 +19,37 @@
   </url>
   <url>
     <loc>https://jisicloudyun.sbs/news.html</loc>
+    <lastmod>2026-11-17</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jisicloudyun.sbs/anonymous-networks-facts.html</loc>
+    <lastmod>2026-11-17</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jisicloudyun.sbs/nextgen-encryption-protocol.html</loc>
+    <lastmod>2026-11-17</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jisicloudyun.sbs/packet-capture-analysis.html</loc>
+    <lastmod>2026-11-17</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jisicloudyun.sbs/soft-routing-optimization.html</loc>
+    <lastmod>2026-11-17</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jisicloudyun.sbs/traffic-obfuscation-tech.html</loc>
+    <lastmod>2026-11-17</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://jisicloudyun.sbs/vps-selection-guide.html</loc>
+    <lastmod>2026-11-17</lastmod>
     <priority>0.8</priority>
   </url>
 </urlset>
